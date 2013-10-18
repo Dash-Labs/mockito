@@ -1,4 +1,4 @@
-version = '1.9.8' //TODO duplicated with file
+version = '1.9.8.dash' //TODO duplicated with file
 group = 'org.mockito'
 description = 'Core API and implementation.'
 

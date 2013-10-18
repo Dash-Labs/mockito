@@ -20,38 +20,20 @@ public class StackTraceFilter implements Serializable {
 
     private static StackTraceCleaner cleaner =
             ClassPathLoader.getStackTraceCleanerProvider().getStackTraceCleaner(new DefaultStackTraceCleaner());
-    
+
     /**
      * Example how the filter works (+/- means good/bad):
      * [a+, b+, c-, d+, e+, f-, g+] -> [a+, b+, g+]
-     * Basically removes all bad from the middle. If any good are in the middle of bad those are also removed. 
+     * Basically removes all bad.
      */
     public StackTraceElement[] filter(StackTraceElement[] target, boolean keepTop) {
-        //TODO: profile
-        List<StackTraceElement> unfilteredStackTrace = Arrays.asList(target);
-        
-        int lastBad = -1;
-        int firstBad = -1;
-        for (int i = 0; i < unfilteredStackTrace.size(); i++) {
-            if (!cleaner.isOut(unfilteredStackTrace.get(i))) {
+        List<StackTraceElement> filteredStackTrace = new ArrayList<StackTraceElement>();
+        for (StackTraceElement stackTraceElement : target) {
+            if (cleaner.isOut(stackTraceElement)) {
                 continue;
             }
-            lastBad = i;
-            if (firstBad == -1) {
-                firstBad = i;
-            }
+            filteredStackTrace.add(stackTraceElement);
         }
-        
-        List<StackTraceElement> top;
-        if (keepTop && firstBad != -1) {
-            top = unfilteredStackTrace.subList(0, firstBad);
-        } else {
-            top = new LinkedList<StackTraceElement>();
-        }
-        
-        List<StackTraceElement> bottom = unfilteredStackTrace.subList(lastBad + 1, unfilteredStackTrace.size());
-        List<StackTraceElement> filtered = new ArrayList<StackTraceElement>(top);
-        filtered.addAll(bottom);
-        return filtered.toArray(new StackTraceElement[]{});
+        return filteredStackTrace.toArray(new StackTraceElement[filteredStackTrace.size()]);
     }
 }
